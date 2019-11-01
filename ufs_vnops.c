@@ -498,6 +498,14 @@ ufs_setattr(ap)
 	struct ucred *cred = ap->a_cred;
 	struct thread *td = curthread;
 	int error;
+	
+	if (vap->va_flags != VNOVAL) {
+		if ((vp->v_mount->mnt_flag & MNT_ACLS) &&
+		   (((ip->i_flags ^ vap->va_flags) & SF_IMMUTABLE) ||
+		   ((ip->i_flags ^ vap->va_flags) & UF_IMMUTABBLE))){
+			return(EPERM);
+		}
+	}
 
 	/*
 	 * Check for unsettable attributes.
